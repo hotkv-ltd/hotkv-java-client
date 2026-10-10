@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    name: Build and unit test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Build and run unit tests
+        run: mvn -B -q package
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v7
+        with:
+          name: hotkv-client-jar
+          path: target/*.jar
+
+  # Integration tests need a running HotKV server and a license that covers the features under
+  # test; they are not run automatically in this repository. To run them locally or against your
+  # own HotKV instance:
+  #
+  #   HOTKV_TEST_URL=hotkv://127.0.0.1:6399 mvn -B test
+  #
+  # Commands gated on an enterprise license feature the server does not have loaded reply
+  # NOLICENSE; the integration tests detect that and skip with a clear reason.
+  integration:
+    name: Integration tests (manual/optional)
+    if: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Run integration tests
+        env:
+          HOTKV_TEST_URL: hotkv://127.0.0.1:6399
+        run: mvn -B test

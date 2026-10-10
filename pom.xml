@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.hotkv</groupId>
+  <artifactId>hotkv-client</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <name>HotKV Java Client</name>
+  <description>A high-performance Java client for HotKV, a RESP2/RESP3-compatible in-memory data store with built-in AI and LLM-serving features.</description>
+  <url>https://github.com/hotkv-ltd/hotkv-java-client</url>
+  <inceptionYear>2026</inceptionYear>
+
+  <organization>
+    <name>HotKV Ltd</name>
+    <url>https://hotkv.com</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>HotKV Ltd</name>
+      <email>support@hotkv.com</email>
+      <organization>HotKV Ltd</organization>
+      <organizationUrl>https://hotkv.com</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:https://github.com/hotkv-ltd/hotkv-java-client.git</connection>
+    <developerConnection>scm:git:https://github.com/hotkv-ltd/hotkv-java-client.git</developerConnection>
+    <url>https://github.com/hotkv-ltd/hotkv-java-client</url>
+    <tag>v1.0.0</tag>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/hotkv-ltd/hotkv-java-client/issues</url>
+  </issueManagement>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.release>17</maven.compiler.release>
+    <junit.version>5.10.2</junit.version>
+    <!-- Release profile: publish to Central without a manual click in the portal. -->
+    <central.autoPublish>false</central.autoPublish>
+    <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
+  </properties>
+
+  <dependencies>
+    <!-- Zero runtime dependencies: the SDK is built only on the JDK
+         (java.net, javax.net.ssl, java.util.concurrent, java.security).
+         JUnit is test scope only and is never packaged. -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>${project.artifactId}-${project.version}</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <release>17</release>
+          <showWarnings>true</showWarnings>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+        <configuration>
+          <trimStackTrace>false</trimStackTrace>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.6.3</version>
+        <configuration>
+          <doclint>none</doclint>
+          <quiet>true</quiet>
+          <failOnError>false</failOnError>
+        </configuration>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.1</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+            </manifest>
+            <manifestEntries>
+              <Implementation-Title>${project.name}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Vendor>HotKV Ltd</Implementation-Vendor>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <!--
+      Release profile: signs every artifact with GPG and publishes the bundle to Maven Central
+      through the Central Portal. The default build (mvn verify) does not need GPG or any
+      credentials. Sources and javadoc jars are attached by the default build; this profile
+      makes javadoc errors fatal so a Central bundle never ships a broken javadoc jar.
+
+        mvn -B -Prelease -Dgpg.skip package            builds the jars, unsigned (no key needed)
+        mvn -B -Prelease deploy                        signs, uploads and publishes (CI only)
+
+      Credentials come from settings.xml: a <server> with id "central" holding the Central Portal
+      user token (username and password), and the GPG key from the environment
+      (MAVEN_GPG_PASSPHRASE or -Dgpg.passphrase). See .github/workflows/publish.yml.
+    -->
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.6.3</version>
+            <configuration>
+              <failOnError>true</failOnError>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>3.2.7</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <configuration>
+                  <gpgArguments>
+                    <arg>--pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>0.8.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+              <autoPublish>${central.autoPublish}</autoPublish>
+              <waitUntil>validated</waitUntil>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
