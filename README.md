@@ -40,7 +40,7 @@ mvn -B package
 ```java
 import com.hotkv.HotKV;
 
-try (HotKV client = HotKV.create("hotkv://localhost:6399")) {
+try (HotKV client = HotKV.create("hotkv://localhost:6379")) {
     client.set("greeting", "hello, HotKV");
     System.out.println(client.get("greeting"));
 
@@ -179,7 +179,7 @@ frames automatically.
 ```java
 import com.hotkv.HotKVCluster;
 
-try (HotKVCluster cluster = HotKVCluster.create("hotkv://node-a:6399", "hotkv://node-b:6399")) {
+try (HotKVCluster cluster = HotKVCluster.create("hotkv://node-a:6379", "hotkv://node-b:6379")) {
     cluster.clientFor("user:42").set("user:42", "..."); // routed by CRC16 slot, full typed API
     Object result = cluster.command("user:42", "GET", "user:42"); // generic, routed automatically
 }
